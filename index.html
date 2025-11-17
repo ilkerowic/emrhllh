@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Okuma Quizi</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 40px auto;
+      line-height: 1.6;
+    }
+    .question-box {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .options {
+      margin-top: 15px;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      text-align: left;
+    }
+    .options button:hover {
+      border-color: #555;
+    }
+    #summary {
+      margin-top: 25px;
+      padding: 15px;
+      border-radius: 10px;
+      border: 1px solid #ddd;
+      display: none;
+    }
+    #download-btn {
+      margin-top: 10px;
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Okuma Quizi (Örnek)</h1>
+  <p>Her sorudan sonra doğru / yanlış geri bildirimi alacaksınız, ardından otomatik olarak sonraki soruya geçilecektir.</p>
+
+  <div id="quiz" class="question-box">
+    <!-- Soru buraya basılacak -->
+  </div>
+
+  <div id="summary">
+    <h2>Quiz Bitti</h2>
+    <p id="score-text"></p>
+    <button id="download-btn">Sonuçları JSON olarak indir</button>
+  </div>
+
+  <script>
+    // SORU HAVUZU ÖRNEĞİ
+    const questions = [
+      {
+        id: "S1",
+        text: "Hikikomori kavramı aşağıdakilerden hangisiyle en çok ilişkilidir?",
+        options: [
+          "Japonya’da işsiz kalmış yaşlılar",
+          "Uzun süre evden çıkmayan gençler",
+          "Sadece internetsiz yaşayan bireyler",
+          "Tam zamanlı çalışan öğrenciler"
+        ],
+        correctIndex: 1
+      },
+      {
+        id: "S2",
+        text: "Metne göre hikikomori olan gençlerin en belirgin özelliği aşağıdakilerden hangisidir?",
+        options: [
+          "Sosyal etkinliklere katılmaları",
+          "Aileleriyle hiç konuşmamaları",
+          "Toplumsal ilişkilerden kaçınmaları",
+          "Yurt dışında eğitim almaları"
+        ],
+        correctIndex: 2
+      },
+      {
+        id: "S3",
+        text: "Bu soruyu sadece örnek olsun diye ekliyoruz. Doğru şık hangisi?",
+        options: [
+          "A şıkkı",
+          "B şıkkı",
+          "C şıkkı (doğru)",
+          "D şıkkı"
+        ],
+        correctIndex: 2
+      }
+    ];
+
+    let currentIndex = 0;
+
+    // Analiz için log tutalım
+    const responseLog = []; 
+    // Her eleman şöyle olacak:
+    // { questionId, selectedIndex, correctIndex, isCorrect, timestamp }
+
+    const quizDiv = document.getElementById("quiz");
+    const summaryDiv = document.getElementById("summary");
+    const scoreText = document.getElementById("score-text");
+    const downloadBtn = document.getElementById("download-btn");
+
+    function renderQuestion() {
+      if (currentIndex >= questions.length) {
+        finishQuiz();
+        return;
+      }
+
+      const q = questions[currentIndex];
+
+      // HTML'ini yaz
+      quizDiv.innerHTML = `
+        <h2>${currentIndex + 1}. Soru</h2>
+        <p>${q.text}</p>
+        <div class="options">
+          ${q.options
+            .map((opt, i) => `<button data-index="${i}">${String.fromCharCode(65+i)} ) ${opt}</button>`)
+            .join("")}
+        </div>
+      `;
+
+      // Butonlara event bağla
+      const optionButtons = quizDiv.querySelectorAll("button[data-index]");
+      optionButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const selectedIndex = Number(btn.getAttribute("data-index"));
+          handleAnswer(selectedIndex);
+        });
+      });
+    }
+
+    function handleAnswer(selectedIndex) {
+      const q = questions[currentIndex];
+      const isCorrect = selectedIndex === q.correctIndex;
+
+      // Log kaydı
+      responseLog.push({
+        questionId: q.id,
+        selectedIndex: selectedIndex,
+        correctIndex: q.correctIndex,
+        isCorrect: isCorrect,
+        timestamp: new Date().toISOString()
+      });
+
+      // Geri bildirim
+      if (isCorrect) {
+        alert("Doğru! ✅");
+      } else {
+        alert(
+          "Yanlış ❌\n\nDoğru cevap: " +
+          String.fromCharCode(65 + q.correctIndex) + " ) " + q.options[q.correctIndex]
+        );
+      }
+
+      // Sonraki soruya geç
+      currentIndex++;
+      if (currentIndex < questions.length) {
+        renderQuestion();
+      } else {
+        finishQuiz();
+      }
+    }
+
+    function finishQuiz() {
+      // Skor hesapla
+      const correctCount = responseLog.filter(r => r.isCorrect).length;
+      const total = questions.length;
+
+      quizDiv.innerHTML = "<p>Tüm soruları cevapladınız.</p>";
+      summaryDiv.style.display = "block";
+      scoreText.textContent = `Doğru sayısı: ${correctCount} / ${total}`;
+
+      // İndirme butonunu ayarla
+      downloadBtn.onclick = () => {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(responseLog, null, 2));
+        const a = document.createElement("a");
+        a.setAttribute("href", dataStr);
+        a.setAttribute("download", "quiz_sonuclari.json");
+        a.click();
+      };
+    }
+
+    // Sayfa açılınca ilk soruyu yükle
+    window.addEventListener("load", renderQuestion);
+  </script>
+</body>
+</html>
