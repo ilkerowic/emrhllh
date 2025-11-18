@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>29. Soru</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      line-height: 1.6;
+    }
+    .question-box {
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    .options button {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      text-align: left;
+    }
+    .options button:hover {
+      border-color: #444;
+    }
+
+    #customModal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #modalContent {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 0 25px rgba(0,0,0,0.3);
+      font-size: 18px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    #modalText {
+      white-space: pre-wrap;
+      text-align: left;
+    }
+    #modalButton {
+      margin-top: 18px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background: #0066cc;
+      color: white;
+      cursor: pointer;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="question-box">
+    <h2>29. Soru</h2>
+
+    <p>
+      Öğretim materyalinin tasarlanması birbiriyle ilişkili birçok işlemin gerçekleştirildiği sistematik bir süreçtir.
+      <br><br>
+      Buna göre aşağıdakilerden hangisi öğretim materyalinin tasarlanmasında öncelikle gerçekleştirilmesi gereken bir işlemdir?
+    </p>
+
+    <div class="options">
+      <button onclick="handleAnswer('A')">A) Öğretim hedeflerinin belirlenmesi</button>
+      <button onclick="handleAnswer('B')">B) Öğrenci özelliklerinin analiz edilmesi</button>
+      <button onclick="handleAnswer('C')">C) Kaynak malzemelerin seçimi</button>
+      <button onclick="handleAnswer('D')">D) Materyalin öğretim hedefleriyle ilişkilendirilmesi</button>
+      <button onclick="handleAnswer('E')">E) Teknolojik imkanların analizi</button>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div id="customModal">
+    <div id="modalContent">
+      <div id="modalText"></div>
+      <button id="modalButton" onclick="closeModal()">Devam</button>
+    </div>
+  </div>
+
+  <script>
+    const QUESTION_ID = "S29";
+    const nextUrl = "30.html";
+    const STORAGE_KEY = "quizLogs";
+
+    const infoText =
+"⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir.";
+
+    const feedbackMap = {
+      A: { type: "correct",   message: "Kesinlikle doğru! Süreç öğretim hedeflerinin belirlenmesi ile başlar. 👍🏻" },
+      B: { type: "affective", message: "Hedef belirlenmesi her zaman ilk aşamadır, dikkat edersen doğru yanıtı bulabilirsin.\n\n" + infoText },
+      C: { type: "affective", message: "Hedef belirlenmesi her zaman ilk aşamadır, dikkat edersen doğru yanıtı bulabilirsin.\n\n" + infoText },
+      D: { type: "affective", message: "Hedef belirlenmesi her zaman ilk aşamadır, dikkat edersen doğru yanıtı bulabilirsin.\n\n" + infoText },
+      E: { type: "affective", message: "Hedef belirlenmesi her zaman ilk aşamadır, dikkat edersen doğru yanıtı bulabilirsin.\n\n" + infoText }
+    };
+
+    let answered = false;
+
+    function handleAnswer(optionKey) {
+      if (answered) return;
+      answered = true;
+
+      const fb = feedbackMap[optionKey];
+      document.getElementById("modalText").textContent = fb.message;
+      document.getElementById("customModal").style.display = "flex";
+
+      saveLog(optionKey, fb.type);
+    }
+
+    function saveLog(selectedOption, feedbackType) {
+      const entry = {
+        questionId: QUESTION_ID,
+        selectedOption,
+        feedbackType,
+        timestamp: new Date().toISOString()
+      };
+
+      let logs = [];
+      try {
+        let raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) logs = JSON.parse(raw);
+      } catch (e) {}
+
+      logs.push(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    }
+
+    function closeModal() {
+      document.getElementById("customModal").style.display = "none";
+      window.location.href = nextUrl;
+    }
+  </script>
+
+</body>
+</html>
