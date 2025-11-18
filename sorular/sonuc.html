@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sonuçlar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 40px auto;
+      text-align: center;
+    }
+    .result-box {
+      border: 1px solid #ddd;
+      padding: 30px;
+      border-radius: 12px;
+      background: #fafafa;
+      font-size: 20px;
+    }
+    .score {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 20px 0;
+      color: #2b7a0b;
+    }
+    #resetBtn, #backBtn {
+      margin-top: 20px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    #resetBtn { background: #b91c1c; color: white; }
+    #backBtn { background: #0077cc; color: white; }
+  </style>
+</head>
+<body>
+
+  <h1>Çalışma Sonuçları</h1>
+
+  <div class="result-box">
+    <p>Toplam doğru sayınız:</p>
+    <div class="score" id="scoreValue">0</div>
+    <p id="detailText"></p>
+  </div>
+
+  <button id="backBtn" onclick="window.location.href='../index.html'">Başa Dön</button>
+  <button id="resetBtn" onclick="resetLogs()">Kayıtları Temizle</button>
+
+  <script>
+    const STORAGE_KEY = "quizLogs";
+
+    function loadLogs() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return [];
+        const logs = JSON.parse(raw);
+        return Array.isArray(logs) ? logs : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function calculateScore(logs) {
+      return logs.filter(l => l.feedbackType === "correct").length;
+    }
+
+    function resetLogs() {
+      if (!confirm("Tüm kayıtları silmek istediğinize emin misiniz?")) return;
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    }
+
+    const logs = loadLogs();
+    const score = calculateScore(logs);
+
+    document.getElementById("scoreValue").textContent = score;
+    document.getElementById("detailText").textContent =
+      `${logs.length} sorudan ${score} tanesini doğru yanıtladınız.`;
+  </script>
+
+</body>
+</html>
