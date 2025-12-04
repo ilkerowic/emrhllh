@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>12. Soru</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    .question-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    h2 { margin-top: 0; color: #333; }
+
+    /* Seçenek Butonları Tasarımı */
+    .options button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0;
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      font-size: 16px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .options button:hover:not([disabled]) {
+      background-color: #f0f8ff;
+      border-color: #b0d4f1;
+    }
+    .options button:disabled {
+      cursor: default;
+      color: #888;
+    }
+
+    /* Seçilen Şık İşaretlemeleri */
+    .options button.selected-correct {
+      border-color: #4CAF50;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .options button.selected-wrong {
+      border-color: #F44336;
+      background-color: #ffebee;
+      color: #c62828;
+      font-weight: bold;
+    }
+
+    /* FEEDBACK ALANI */
+    #feedbackArea {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background-color: #fafafa;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    #feedbackTitle {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .status-correct {
+      color: #4CAF50;
+      border-left: 5px solid #4CAF50;
+    }
+    .status-wrong {
+      color: #d32f2f;
+      border-left: 5px solid #d32f2f;
+    }
+
+    #feedbackText {
+      white-space: pre-wrap;
+      color: #555;
+    }
+
+    /* SONRAKİ SORU BUTONU */
+    #nextButtonContainer {
+      display: none;
+      margin-top: 20px;
+    }
+    #btnNext {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #btnNext:hover {
+      background-color: #1565c0;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="question-box">
+    <h2>12. Soru</h2>
+
+    <p><strong>12.</strong></p>
+
+    <p>
+      I. İşlenecek kazanımları<br>
+      II. Kullanılacak öğretim materyallerini<br>
+      III. Ünitenin ne kadar zamanda işleneceğini<br>
+      IV. Değerlendirme etkinliklerini
+    </p>
+
+    <p>
+      Bir ders planının yukarıda verilenlerden hangilerini göstermesi beklenir?
+    </p>
+
+    <div class="options">
+      <button id="btnA" onclick="handleAnswer('A')">A) I ve II</button>
+      <button id="btnB" onclick="handleAnswer('B')">B) I ve III</button>
+      <button id="btnC" onclick="handleAnswer('C')">C) I, II ve III</button>
+      <button id="btnD" onclick="handleAnswer('D')">D) I, II ve IV</button>
+      <button id="btnE" onclick="handleAnswer('E')">E) I, II, III ve IV</button>
+    </div>
+
+    <div id="feedbackArea">
+      <span id="feedbackTitle"></span>
+      <div id="feedbackText"></div>
+    </div>
+
+    <div id="nextButtonContainer">
+      <button id="btnNext" onclick="goToNext()">Sonraki Soru</button>
+    </div>
+  </div>
+
+  <script>
+    const QUESTION_ID = "S12";
+    const nextUrl = "13.html"; // Sonraki soru dosyası
+    const STORAGE_KEY = "quizLogs";
+
+    // 12. Soruya özel feedback metinleri
+    const feedbackMap = {
+      A: {
+        type: "affective",
+        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+      },
+      B: {
+        type: "affective",
+        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+      },
+      C: {
+        type: "cognitive",
+        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+      },
+      D: {
+        type: "correct",
+        message: "Tebrikler, ders planının neleri içermesi gerektiğini biliyorsun 👏"
+      },
+      E: {
+        type: "cognitive",
+        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+      }
+    };
+
+    let answered = false;
+
+    function handleAnswer(optionKey) {
+      if (answered) return;
+      answered = true;
+
+      const fb = feedbackMap[optionKey];
+      if (!fb) return;
+
+      // 1. Tüm butonları kilitle
+      const buttons = document.querySelectorAll('.options button');
+      buttons.forEach(btn => btn.disabled = true);
+
+      // 2. Tıklanan butonu işaretle
+      const clickedBtn = document.getElementById('btn' + optionKey);
+      const isCorrect = (fb.type === "correct");
+
+      if (isCorrect) {
+        clickedBtn.classList.add('selected-correct');
+        clickedBtn.innerHTML += "  (Doğru Cevap)";
+      } else {
+        clickedBtn.classList.add('selected-wrong');
+        clickedBtn.innerHTML += "  (Cevabınız)";
+      }
+
+      // 3. Feedback Alanını Doldur ve Göster
+      const fbArea = document.getElementById('feedbackArea');
+      const fbTitle = document.getElementById('feedbackTitle');
+      const fbText = document.getElementById('feedbackText');
+
+      fbText.textContent = fb.message;
+
+      if (isCorrect) {
+        fbTitle.textContent = "Doğru Yanıt!";
+        fbTitle.style.color = "#2e7d32";
+        fbArea.className = "status-correct";
+        fbArea.style.backgroundColor = "#e8f5e9";
+        fbArea.style.borderColor = "#c8e6c9";
+      } else {
+        fbTitle.textContent = "Yanlış Yanıt!";
+        fbTitle.style.color = "#c62828";
+        fbArea.className = "status-wrong";
+        fbArea.style.backgroundColor = "#ffebee";
+        fbArea.style.borderColor = "#ffcdd2";
+      }
+
+      fbArea.style.display = "block";
+
+      // 4. Sonraki Soru butonunu göster
+      document.getElementById('nextButtonContainer').style.display = "block";
+
+      // 5. Log kaydı
+      saveLog(optionKey, fb.type);
+    }
+
+    function goToNext() {
+      if (nextUrl) {
+        window.location.href = nextUrl;
+      }
+    }
+
+    function saveLog(selectedOption, feedbackType) {
+      const entry = {
+        questionId: QUESTION_ID,
+        selectedOption,
+        feedbackType,
+        timestamp: new Date().toISOString()
+      };
+
+      let logs = [];
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          logs = JSON.parse(raw);
+          if (!Array.isArray(logs)) logs = [];
+        }
+      } catch (e) {
+        logs = [];
+      }
+
+      logs.push(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    }
+  </script>
+
+</body>
+</html>

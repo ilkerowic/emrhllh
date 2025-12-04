@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>1. Soru</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif; /* Biraz daha modern font */
+      max-width: 800px;
+      margin: 40px auto;
+      line-height: 1.6;
+      background-color: #f9f9f9;
+    }
+    .question-box {
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    h2 { margin-top: 0; color: #333; }
+
+    /* Seçenek Butonları Tasarımı */
+    .options button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px 15px;
+      border-radius: 8px;
+      border: 2px solid #e0e0e0; /* Kenarlık belirginleştirildi */
+      background: #fff;
+      cursor: pointer;
+      text-align: left;
+      font-size: 16px;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .options button:hover:not([disabled]) {
+      background-color: #f0f8ff;
+      border-color: #b0d4f1;
+    }
+    .options button:disabled {
+      cursor: default;
+      color: #888;
+    }
+
+    /* Seçilen Şık İşaretlemeleri (JS ile eklenecek sınıflar) */
+    .options button.selected-correct {
+      border-color: #4CAF50;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      font-weight: bold;
+    }
+    .options button.selected-wrong {
+      border-color: #F44336;
+      background-color: #ffebee;
+      color: #c62828;
+      font-weight: bold;
+    }
+
+    /* FEEDBACK (GERİ BİLDİRİM) ALANI */
+    #feedbackArea {
+      display: none; /* Başlangıçta gizli */
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background-color: #fafafa;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    /* Geri Bildirim Başlıkları */
+    #feedbackTitle {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .status-correct {
+      color: #4CAF50; /* Yeşil */
+      border-left: 5px solid #4CAF50;
+    }
+    .status-wrong {
+      color: #d32f2f; /* Kırmızı */
+      border-left: 5px solid #d32f2f;
+    }
+
+    #feedbackText {
+      white-space: pre-wrap; /* Satır sonlarını korur */
+      color: #555;
+    }
+
+    /* SONRAKİ SORU BUTONU */
+    #nextButtonContainer {
+      display: none; /* Başlangıçta gizli */
+      margin-top: 20px;
+    }
+    #btnNext {
+      background-color: #1976d2; /* Mavi tonu */
+      color: white;
+      border: none;
+      padding: 12px 25px;
+      font-size: 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    #btnNext:hover {
+      background-color: #1565c0;
+    }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="question-box">
+    <p><strong>1.</strong></p>
+    <p>
+      I. Basılı öğretim materyalleri<br>
+      II. Görsel-işitsel öğretim materyalleri<br>
+      III. Modeller<br>
+      IV. İşitsel materyaller
+    </p>
+
+    <p>
+      Güneş sisteminin nasıl çalıştığını hareketli olarak göstermek isteyen bir öğretmenin
+      yukarıdaki öğretim materyallerinden hangisini ya da hangilerini kullanması beklenir?
+    </p>
+
+    <div class="options" id="optionsContainer">
+      <button id="btnA" onclick="handleAnswer('A')">A) II ve III</button>
+      <button id="btnB" onclick="handleAnswer('B')">B) I ve III</button>
+      <button id="btnC" onclick="handleAnswer('C')">C) I ve II</button>
+      <button id="btnD" onclick="handleAnswer('D')">D) I, II ve IV</button>
+      <button id="btnE" onclick="handleAnswer('E')">E) II, III ve IV</button>
+    </div>
+
+    <div id="feedbackArea">
+      <span id="feedbackTitle"></span>
+      <div id="feedbackText"></div>
+    </div>
+
+    <div id="nextButtonContainer">
+      <button id="btnNext" onclick="goToNext()">Sonraki Soru</button>
+    </div>
+
+  </div>
+
+  <script>
+    const QUESTION_ID = "S1";
+    const nextUrl = "test2.html"; 
+    const STORAGE_KEY = "quizLogs";
+
+    // Feedback içeriği (Senin verilerin)
+    const feedbackMap = {
+      A: {
+        type: "correct",
+        message: "Bravo! Öğretim materyali türleriyle ilgili harika bir başlangıç yaptın! 👍🏻"
+      },
+      B: {
+        type: "affective",
+        message: "Yanlış bir cevapla başladın ama moralini bozma, dikkatini dağıtan bir şey olmuş olabilir! Açıklamaya odaklanmanı öneriyorum.\n\nGüneş sisteminin nasıl çalıştığını hareketli olarak göstermek isteyen bir öğretmen, video gibi hem görsel hem işitsel öğretim materyallerini ve modelleri kullanabilir."
+      },
+      C: {
+        type: "affective",
+        message: "Yanlış bir cevapla başladın ama moralini bozma, dikkatini dağıtan bir şey olmuş olabilir! Açıklamaya odaklanmanı öneriyorum.\n\nGüneş sisteminin nasıl çalıştığını hareketli olarak göstermek isteyen bir öğretmen, video gibi hem görsel hem işitsel öğretim materyallerini ve modelleri kullanabilir."
+      },
+      D: {
+        type: "cognitive",
+        message: "Yanlış bir cevapla başladın ama moralini bozma, dikkatini dağıtan bir şey olmuş olabilir! Açıklamaya odaklanmanı öneriyorum.\n\nGüneş sisteminin nasıl çalıştığını hareketli olarak göstermek isteyen bir öğretmen, video gibi hem görsel hem işitsel öğretim materyallerini ve modelleri kullanabilir."
+      },
+      E: {
+        type: "cognitive",
+        message: "Yanlış bir cevapla başladın ama moralini bozma, dikkatini dağıtan bir şey olmuş olabilir! Açıklamaya odaklanmanı öneriyorum.\n\nGüneş sisteminin nasıl çalıştığını hareketli olarak göstermek isteyen bir öğretmen, video gibi hem görsel hem işitsel öğretim materyallerini ve modelleri kullanabilir."
+      }
+    };
+
+    let answered = false;
+
+    function handleAnswer(optionKey) {
+      if (answered) return; // Zaten cevaplandıysa tekrar tıklatmayalım
+      answered = true;
+
+      const fb = feedbackMap[optionKey];
+      if (!fb) return;
+
+      // 1. Tüm butonları kilitle (tekrar basılmasın)
+      const buttons = document.querySelectorAll('.options button');
+      buttons.forEach(btn => btn.disabled = true);
+
+      // 2. Tıklanan butonu görsel olarak işaretle
+      const clickedBtn = document.getElementById('btn' + optionKey);
+      
+      // Doğru mu yanlış mı kontrolü
+      const isCorrect = (fb.type === "correct");
+
+      if (isCorrect) {
+        clickedBtn.classList.add('selected-correct');
+        clickedBtn.innerHTML += "  (Doğru Cevap)"; // İsteğe bağlı: Buton içine yazı ekleme
+      } else {
+        clickedBtn.classList.add('selected-wrong');
+        clickedBtn.innerHTML += "  (Cevabınız)"; // İsteğe bağlı
+      }
+
+      // 3. Feedback Alanını Hazırla
+      const fbArea = document.getElementById('feedbackArea');
+      const fbTitle = document.getElementById('feedbackTitle');
+      const fbText = document.getElementById('feedbackText');
+
+      // İçeriği doldur
+      fbText.textContent = fb.message;
+
+      if (isCorrect) {
+        fbTitle.textContent = "Doğru Yanıt!";
+        fbTitle.style.color = "#2e7d32";
+        fbArea.className = "status-correct"; // Yeşil kenar çizgisi için
+        fbArea.style.backgroundColor = "#e8f5e9";
+        fbArea.style.borderColor = "#c8e6c9";
+      } else {
+        fbTitle.textContent = "Yanlış Yanıt!";
+        fbTitle.style.color = "#c62828";
+        fbArea.className = "status-wrong"; // Kırmızı kenar çizgisi için
+        fbArea.style.backgroundColor = "#ffebee";
+        fbArea.style.borderColor = "#ffcdd2";
+      }
+
+      // Alanı göster
+      fbArea.style.display = "block";
+
+      // 4. Sonraki Soru butonunu göster
+      document.getElementById('nextButtonContainer').style.display = "block";
+
+      // 5. Log kaydı (Değişmedi)
+      saveLog(optionKey, fb.type);
+    }
+
+    function goToNext() {
+      if (nextUrl) {
+        window.location.href = nextUrl;
+      }
+    }
+
+    function saveLog(selectedOption, feedbackType) {
+      const entry = {
+        questionId: QUESTION_ID,
+        selectedOption,
+        feedbackType,
+        timestamp: new Date().toISOString()
+      };
+
+      let logs = [];
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          logs = JSON.parse(raw);
+          if (!Array.isArray(logs)) logs = [];
+        }
+      } catch (e) {
+        logs = [];
+      }
+
+      logs.push(entry);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    }
+  </script>
+
+</body>
+</html>
