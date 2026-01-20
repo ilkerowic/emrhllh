@@ -88,18 +88,22 @@
       margin-bottom: 10px;
       display: block;
     }
+
+    /* Durum Kutuları Kenar Renkleri */
     .status-correct {
-      color: #4CAF50;
       border-left: 5px solid #4CAF50;
+      background-color: #e8f5e9;
+      border-color: #c8e6c9;
     }
     .status-wrong {
-      color: #d32f2f;
       border-left: 5px solid #d32f2f;
+      background-color: #ffebee;
+      border-color: #ffcdd2;
     }
 
     #feedbackText {
       white-space: pre-wrap;
-      color: #555;
+      font-weight: 500;
     }
 
     /* SONRAKİ SORU BUTONU */
@@ -164,18 +168,23 @@
 
   <script>
     const QUESTION_ID = "S4";
-    const nextUrl = "5.html";  // Sonraki soru
+    const nextUrl = "5.html";
     const STORAGE_KEY = "quizLogs";
 
-    // 4. Soruya özel feedback metinleri
+    // Ortak Bilişsel Bilgi (Siyah olacak)
+    const commonCognitive = "⁉️💡Materyal tasarımında oklar önemli bir bilginin ayırt edilmesine olanak tanıyarak bilginin vurgulanmasına ve öğrencinin dikkatinin çekilmesine yardımcı olur.";
+    
+    // Ortak Duyuşsal Bilgi (Turuncu olacak)
+    const commonAffective = "Materyal tasarlama süreci karmaşık gelmiş olabilir, bir sonraki soruya daha iyi odaklanmayı deneyelim.";
+
     const feedbackMap = {
       A: {
         type: "affective",
-        message: "Materyal tasarlama süreci karmaşık gelmiş olabilir, bir sonraki soruya daha iyi odaklanmayı deneyelim.\n\n⁉️💡Materyal tasarımında oklar önemli bir bilginin ayırt edilmesine olanak tanıyarak bilginin vurgulanmasına ve öğrencinin dikkatinin çekilmesine yardımcı olur."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       B: {
         type: "affective",
-        message: "Materyal tasarlama süreci karmaşık gelmiş olabilir, bir sonraki soruya daha iyi odaklanmayı deneyelim.\n\n⁉️💡Materyal tasarımında oklar önemli bir bilginin ayırt edilmesine olanak tanıyarak bilginin vurgulanmasına ve öğrencinin dikkatinin çekilmesine yardımcı olur."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       C: {
         type: "correct",
@@ -183,11 +192,11 @@
       },
       D: {
         type: "affective",
-        message: "Materyal tasarlama süreci karmaşık gelmiş olabilir, bir sonraki soruya daha iyi odaklanmayı deneyelim.\n\n⁉️💡Materyal tasarımında oklar önemli bir bilginin ayırt edilmesine olanak tanıyarak bilginin vurgulanmasına ve öğrencinin dikkatinin çekilmesine yardımcı olur."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       E: {
         type: "affective",
-        message: "Materyal tasarlama süreci karmaşık gelmiş olabilir, bir sonraki soruya daha iyi odaklanmayı deneyelim.\n\n⁉️💡Materyal tasarımında oklar önemli bir bilginin ayırt edilmesine olanak tanıyarak bilginin vurgulanmasına ve öğrencinin dikkatinin çekilmesine yardımcı olur."
+        message: commonAffective + "\n\n" + commonCognitive
       }
     };
 
@@ -221,20 +230,40 @@
       const fbTitle = document.getElementById('feedbackTitle');
       const fbText = document.getElementById('feedbackText');
 
-      fbText.textContent = fb.message;
+      fbText.innerHTML = "";
 
       if (isCorrect) {
+        // --- DOĞRU CEVAP: YEŞİL KUTU, MAVİ YAZI ---
         fbTitle.textContent = "Doğru Yanıt!";
-        fbTitle.style.color = "#2e7d32";
+        fbTitle.style.color = "#2e7d32"; 
+        
         fbArea.className = "status-correct";
-        fbArea.style.backgroundColor = "#e8f5e9";
-        fbArea.style.borderColor = "#c8e6c9";
+        
+        // Mavi metin
+        fbText.innerHTML = `<span style="color: #0277bd;">${fb.message}</span>`;
+
       } else {
+        // --- YANLIŞ CEVAP: KIRMIZI KUTU, TURUNCU + SİYAH YAZI ---
         fbTitle.textContent = "Yanlış Yanıt!";
         fbTitle.style.color = "#c62828";
+        
         fbArea.className = "status-wrong";
-        fbArea.style.backgroundColor = "#ffebee";
-        fbArea.style.borderColor = "#ffcdd2";
+
+        // Metni böl ve renklendir
+        const parts = fb.message.split("\n\n");
+
+        if (parts.length > 1) {
+            // 1. Kısım (Duyuşsal) -> Turuncu
+            const affectiveSpan = `<div style="color: #ef6c00; margin-bottom: 8px;">${parts[0]}</div>`;
+            
+            // 2. Kısım (Bilişsel) -> Siyah
+            const cognitiveText = parts.slice(1).join("<br><br>"); 
+            const cognitiveSpan = `<div style="color: #333;">${cognitiveText}</div>`;
+            
+            fbText.innerHTML = affectiveSpan + cognitiveSpan;
+        } else {
+            fbText.innerHTML = `<span style="color: #ef6c00;">${fb.message}</span>`;
+        }
       }
 
       fbArea.style.display = "block";
