@@ -87,6 +87,7 @@
     #feedbackText {
       white-space: pre-wrap;
       color: #555;
+      font-weight: bold; /* TÜM FEEDBACK METNİ KALIN */
     }
 
     /* SONRAKİ SORU BUTONU */
@@ -150,19 +151,25 @@
     const nextUrl = "15.html"; // Sonraki soru dosyası
     const STORAGE_KEY = "quizLogs";
 
+    // Ortak Bilişsel Bilgi (Siyah ve Kalın olacak)
+    const commonCognitive = "⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir.";
+    
+    // Ortak Duyuşsal Bilgi (Turuncu ve Kalın olacak)
+    const commonAffective = "Materyal tasarımının nasıl başlaması gerektiğine odaklanırsan doğru yanıta ulaşabileceğine eminim.";
+
     // 14. Soruya özel feedback metinleri
     const feedbackMap = {
       A: {
         type: "affective",
-        message: "Materyal tasarımının nasıl başlaması gerektiğine odaklanırsan doğru yanıta ulaşabileceğine eminim.\n\n⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       B: {
         type: "affective",
-        message: "Materyal tasarımının nasıl başlaması gerektiğine odaklanırsan doğru yanıta ulaşabileceğine eminim.\n\n⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       C: {
         type: "affective",
-        message: "Materyal tasarımının nasıl başlaması gerektiğine odaklanırsan doğru yanıta ulaşabileceğine eminim.\n\n⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       D: {
         type: "correct",
@@ -170,7 +177,7 @@
       },
       E: {
         type: "affective",
-        message: "Materyal tasarımının nasıl başlaması gerektiğine odaklanırsan doğru yanıta ulaşabileceğine eminim.\n\n⁉️💡Öğretim materyalinin tasarlanmasında öncelikle öğretim hedeflerinin belirlenmesi gerekmektedir. Hedefler belirlendikten sonra, diğer işlemler bu hedeflere ulaşmayı sağlayacak şekilde gerçekleştirilir."
+        message: commonAffective + "\n\n" + commonCognitive
       }
     };
 
@@ -204,20 +211,40 @@
       const fbTitle = document.getElementById('feedbackTitle');
       const fbText = document.getElementById('feedbackText');
 
-      fbText.textContent = fb.message;
+      fbText.innerHTML = "";
 
       if (isCorrect) {
+        // --- DOĞRU CEVAP: YEŞİL KUTU, MAVİ VE KALIN YAZI ---
         fbTitle.textContent = "Doğru Yanıt!";
-        fbTitle.style.color = "#2e7d32";
+        fbTitle.style.color = "#2e7d32"; 
+        
         fbArea.className = "status-correct";
-        fbArea.style.backgroundColor = "#e8f5e9";
-        fbArea.style.borderColor = "#c8e6c9";
+        
+        // Mavi metin (CSS'deki font-weight: bold sayesinde kalın olacak)
+        fbText.innerHTML = `<span style="color: #0277bd;">${fb.message}</span>`;
+
       } else {
+        // --- YANLIŞ CEVAP: KIRMIZI KUTU, TURUNCU/SİYAH VE KALIN YAZI ---
         fbTitle.textContent = "Yanlış Yanıt!";
         fbTitle.style.color = "#c62828";
+        
         fbArea.className = "status-wrong";
-        fbArea.style.backgroundColor = "#ffebee";
-        fbArea.style.borderColor = "#ffcdd2";
+
+        // Metni böl ve renklendir
+        const parts = fb.message.split("\n\n");
+
+        if (parts.length > 1) {
+            // 1. Kısım (Duyuşsal) -> Turuncu
+            const affectiveSpan = `<div style="color: #ef6c00; margin-bottom: 8px;">${parts[0]}</div>`;
+            
+            // 2. Kısım (Bilişsel) -> Siyah
+            const cognitiveText = parts.slice(1).join("<br><br>"); 
+            const cognitiveSpan = `<div style="color: #333;">${cognitiveText}</div>`;
+            
+            fbText.innerHTML = affectiveSpan + cognitiveSpan;
+        } else {
+            fbText.innerHTML = `<span style="color: #ef6c00;">${fb.message}</span>`;
+        }
       }
 
       fbArea.style.display = "block";
