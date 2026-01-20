@@ -86,7 +86,7 @@
 
     #feedbackText {
       white-space: pre-wrap;
-      color: #555;
+      font-weight: bold; /* TÜM FEEDBACK METNİ KALIN */
     }
 
     /* SONRAKİ SORU BUTONU */
@@ -158,29 +158,33 @@
     const nextUrl = "18.html"; // Sonraki soru dosyası
     const STORAGE_KEY = "quizLogs";
     
-    const infoText = "\n⁉️💡Doküman kamerasıyla origami gibi üç boyutlu öğretim materyallerinin yapım süreci eş zamanlı olarak ayrıntılı bir şekilde öğrencilere sunulabilir. Diğer araçlarla üç boyutlu materyallerin görüntülerinin yansıtılması mümkün değildir.";
+    // Ortak Bilişsel Bilgi (Siyah ve Kalın)
+    const commonCognitive = "⁉️💡Doküman kamerasıyla origami gibi üç boyutlu öğretim materyallerinin yapım süreci eş zamanlı olarak ayrıntılı bir şekilde öğrencilere sunulabilir. Diğer araçlarla üç boyutlu materyallerin görüntülerinin yansıtılması mümkün değildir.";
+    
+    // Ortak Duyuşsal Bilgi (Turuncu ve Kalın)
+    const commonAffective = "Yanıtın yanlış olsa da moralini bozma, açıklamayı okuyarak yanıtının neden yanlış olduğunu anlayabilirsin.";
 
     // 17. Soruya özel feedback metinleri
     const feedbackMap = {
       A: {
         type: "affective",
-        message: "Yanıtın yanlış olsa da moralini bozma, açıklamayı okuyarak yanıtının neden yanlış olduğunu anlayabilirsin." + infoText
+        message: commonAffective + "\n\n" + commonCognitive
       },
       B: {
         type: "affective",
-        message: "Yanıtın yanlış olsa da moralini bozma, açıklamayı okuyarak yanıtının neden yanlış olduğunu anlayabilirsin." + infoText
+        message: commonAffective + "\n\n" + commonCognitive
       },
       C: {
         type: "correct",
         message: "Harika, tam isabet. Öğretim araçları konusunu iyi anlamış görünüyorsun. 👍🏻"
       },
       D: {
-        type: "cognitive",
-        message: "Yanıtın yanlış olsa da moralini bozma, açıklamayı okuyarak yanıtının neden yanlış olduğunu anlayabilirsin." + infoText
+        type: "affective",
+        message: commonAffective + "\n\n" + commonCognitive
       },
       E: {
-        type: "cognitive",
-        message: "Yanıtın yanlış olsa da moralini bozma, açıklamayı okuyarak yanıtının neden yanlış olduğunu anlayabilirsin." + infoText
+        type: "affective",
+        message: commonAffective + "\n\n" + commonCognitive
       }
     };
 
@@ -214,20 +218,40 @@
       const fbTitle = document.getElementById('feedbackTitle');
       const fbText = document.getElementById('feedbackText');
 
-      fbText.textContent = fb.message;
+      fbText.innerHTML = "";
 
       if (isCorrect) {
+        // --- DOĞRU CEVAP: YEŞİL KUTU, MAVİ VE KALIN YAZI ---
         fbTitle.textContent = "Doğru Yanıt!";
-        fbTitle.style.color = "#2e7d32";
+        fbTitle.style.color = "#2e7d32"; 
+        
         fbArea.className = "status-correct";
-        fbArea.style.backgroundColor = "#e8f5e9";
-        fbArea.style.borderColor = "#c8e6c9";
+        
+        // Mavi ve Kalın Metin
+        fbText.innerHTML = `<span style="color: #0277bd; font-weight: bold;">${fb.message}</span>`;
+
       } else {
+        // --- YANLIŞ CEVAP: KIRMIZI KUTU, TURUNCU/SİYAH VE KALIN YAZI ---
         fbTitle.textContent = "Yanlış Yanıt!";
         fbTitle.style.color = "#c62828";
+        
         fbArea.className = "status-wrong";
-        fbArea.style.backgroundColor = "#ffebee";
-        fbArea.style.borderColor = "#ffcdd2";
+
+        // Metni böl ve renklendir
+        const parts = fb.message.split("\n\n");
+
+        if (parts.length > 1) {
+            // 1. Kısım (Duyuşsal) -> Turuncu ve Kalın
+            const affectiveSpan = `<div style="color: #ef6c00; font-weight: bold; margin-bottom: 8px;">${parts[0]}</div>`;
+            
+            // 2. Kısım (Bilişsel) -> Siyah ve Kalın
+            const cognitiveText = parts.slice(1).join("<br><br>"); 
+            const cognitiveSpan = `<div style="color: #333; font-weight: bold;">${cognitiveText}</div>`;
+            
+            fbText.innerHTML = affectiveSpan + cognitiveSpan;
+        } else {
+            fbText.innerHTML = `<span style="color: #ef6c00; font-weight: bold;">${fb.message}</span>`;
+        }
       }
 
       fbArea.style.display = "block";
