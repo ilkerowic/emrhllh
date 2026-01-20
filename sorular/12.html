@@ -87,6 +87,7 @@
     #feedbackText {
       white-space: pre-wrap;
       color: #555;
+      font-weight: bold; /* TÜM FEEDBACK METNİ KALIN YAPILDI */
     }
 
     /* SONRAKİ SORU BUTONU */
@@ -155,27 +156,33 @@
     const nextUrl = "13.html"; // Sonraki soru dosyası
     const STORAGE_KEY = "quizLogs";
 
+    // Ortak Bilişsel Bilgi (Siyah olacak)
+    const commonCognitive = "⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir.";
+    
+    // Ortak Duyuşsal Bilgi (Turuncu olacak)
+    const commonAffective = "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.";
+
     // 12. Soruya özel feedback metinleri
     const feedbackMap = {
       A: {
         type: "affective",
-        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       B: {
         type: "affective",
-        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+        message: commonAffective + "\n\n" + commonCognitive
       },
       C: {
-        type: "cognitive",
-        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+        type: "affective",
+        message: commonAffective + "\n\n" + commonCognitive
       },
       D: {
         type: "correct",
         message: "Tebrikler, ders planının neleri içermesi gerektiğini biliyorsun 👏"
       },
       E: {
-        type: "cognitive",
-        message: "Daha dikkatli okuduğunda doğru yanıtı bulabileceğinden eminim.\n\n⁉️💡Bir ders planı, işlenecek kazanımları, kullanılacak öğretim materyallerini ve değerlendirme etkinliklerini içeren kapsamlı bir belgedir. Ancak bir ünitenin ne kadar sürede tamamlanacağı ders planında değil ünitelendirilmiş yıllık planda gösterilir."
+        type: "affective",
+        message: commonAffective + "\n\n" + commonCognitive
       }
     };
 
@@ -209,20 +216,40 @@
       const fbTitle = document.getElementById('feedbackTitle');
       const fbText = document.getElementById('feedbackText');
 
-      fbText.textContent = fb.message;
+      fbText.innerHTML = "";
 
       if (isCorrect) {
+        // --- DOĞRU CEVAP: YEŞİL KUTU, MAVİ VE KALIN YAZI ---
         fbTitle.textContent = "Doğru Yanıt!";
-        fbTitle.style.color = "#2e7d32";
+        fbTitle.style.color = "#2e7d32"; 
+        
         fbArea.className = "status-correct";
-        fbArea.style.backgroundColor = "#e8f5e9";
-        fbArea.style.borderColor = "#c8e6c9";
+        
+        // Mavi metin (CSS'deki font-weight: bold sayesinde kalın olacak)
+        fbText.innerHTML = `<span style="color: #0277bd;">${fb.message}</span>`;
+
       } else {
+        // --- YANLIŞ CEVAP: KIRMIZI KUTU, TURUNCU/SİYAH VE KALIN YAZI ---
         fbTitle.textContent = "Yanlış Yanıt!";
         fbTitle.style.color = "#c62828";
+        
         fbArea.className = "status-wrong";
-        fbArea.style.backgroundColor = "#ffebee";
-        fbArea.style.borderColor = "#ffcdd2";
+
+        // Metni böl ve renklendir
+        const parts = fb.message.split("\n\n");
+
+        if (parts.length > 1) {
+            // 1. Kısım (Duyuşsal) -> Turuncu
+            const affectiveSpan = `<div style="color: #ef6c00; margin-bottom: 8px;">${parts[0]}</div>`;
+            
+            // 2. Kısım (Bilişsel) -> Siyah
+            const cognitiveText = parts.slice(1).join("<br><br>"); 
+            const cognitiveSpan = `<div style="color: #333;">${cognitiveText}</div>`;
+            
+            fbText.innerHTML = affectiveSpan + cognitiveSpan;
+        } else {
+            fbText.innerHTML = `<span style="color: #ef6c00;">${fb.message}</span>`;
+        }
       }
 
       fbArea.style.display = "block";
